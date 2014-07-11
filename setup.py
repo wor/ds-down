@@ -8,7 +8,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read() if os.path.exists("README.rst") else ""
 NEWS = open(os.path.join(here, 'NEWS.rst')).read() if os.path.exists("NEWS.rst") else ""
 
-version      = '0.1'
+version      = '0.2'
 author       ='Esa Määttä'
 author_email ='esa.maatta@iki.fi'
 
