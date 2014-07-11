@@ -51,8 +51,15 @@ setup(name='ds-down',
     maintainer_email=author_email,
     url='http://github.com/wor/ds-down',
     license='GPL3',
+    package_data = {
+            '': ['*.rst', 'ds-down.conf', 'ds-down.desktop'],
+            },
     packages=find_packages('src'),
-    package_dir = {'': 'src'},include_package_data=True,
+    package_dir = {'': 'src'},
+    data_files=[
+            ('share/ds-down/doc', ['ds-down.conf', 'ds-down.desktop', 'README.rst']),
+            ],
+    include_package_data=True,
     zip_safe=False,
     # Requirements
     install_requires=install_requires,
