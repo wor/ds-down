@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=ds-down
+Comment=URL added for Synology DownloadStation
+Exec=ds_down %U
+Terminal=false
+Type=Application
+Categories=Utility;
+MimeType=x-scheme-handler/magnet;application/x-bittorrent;
+StartupNotify=false
