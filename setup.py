@@ -8,7 +8,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read() if os.path.exists("README.rst") else ""
 NEWS = open(os.path.join(here, 'NEWS.rst')).read() if os.path.exists("NEWS.rst") else ""
 
-version      = '0.2'
+version      = '0.2.1'
 author       ='Esa Määttä'
 author_email ='esa.maatta@iki.fi'
 
@@ -51,13 +51,14 @@ setup(name='ds-down',
     maintainer_email=author_email,
     url='http://github.com/wor/ds-down',
     license='GPL3',
-    package_data = {
-            '': ['*.rst', 'ds-down.conf', 'ds-down.desktop'],
-            },
+    #package_data = {
+    #        '': ['*.rst', 'ds-down.conf', 'ds-down.desktop'],
+    #        },
     packages=find_packages('src'),
     package_dir = {'': 'src'},
     data_files=[
-            ('share/ds-down/doc', ['ds-down.conf', 'ds-down.desktop', 'README.rst']),
+            ('share/ds-down/doc', ['README.rst']),
+            ('share/ds-down/conf', ['ds-down.conf', 'ds-down.desktop']),
             ],
     include_package_data=True,
     zip_safe=False,
