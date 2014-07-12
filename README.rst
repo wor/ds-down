@@ -51,7 +51,7 @@ This also installs needed dependencies.
 PyPI Install
 ------------
 
-Alternatively last published version can be installed from PyPI with pip:
+Alternatively last published version can be installed from PyPI_ with pip:
 
 .. code-block:: bash
 
@@ -61,3 +61,4 @@ Alternatively last published version can be installed from PyPI with pip:
 
 .. _`API pdf`: http://ukdl.synology.com/download/Document/DeveloperGuide/Synology_Download_Station_Web_API.pdf
 .. _config: https://github.com/wor/ds-down/blob/master/ds-down.conf
+.. _PyPI: https://pypi.python.org/pypi/ds-down
