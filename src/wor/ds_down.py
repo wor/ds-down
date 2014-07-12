@@ -284,7 +284,7 @@ def process_cmd_line(inputs=sys.argv[1:], parent_parsers=list()):
     parser.add_argument(
         '-v',
         nargs='?',
-        default=10,
+        default=2,
         action=Verbose_action,
         dest='verbose',
         help="Verbosity level specifier.")
@@ -323,7 +323,7 @@ def main():
         with step=10.
 
         Input:          -2, -1,  0,  1,  2
-        Return value:   10, 20, 30, 40, 50
+        Return value:   50, 40, 30, 20, 10
 
         Parameters:
 
