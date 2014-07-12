@@ -19,3 +19,6 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# vim cache files
+.*.swp
