@@ -35,4 +35,4 @@ Send a locally stored torrent file to the DownloadStation:
 
 
 .. _`API pdf`: http://ukdl.synology.com/download/Document/DeveloperGuide/Synology_Download_Station_Web_API.pdf
-.. _config: https://github.com/wor/ds-down/
+.. _config: https://github.com/wor/ds-down/blob/master/ds-down.conf
