@@ -1,7 +1,7 @@
 ds-down
 =======
 
-ds-down is a Python program to send URLs and local files to Synology
+ds-down is a Python 3 program to send URLs and local files to Synology
 DownloadStation using aforementioned DownloadStations Web API (`API pdf`_).
 
 The main intended use-case is from console and a desktop file for xdg-open or
@@ -32,6 +32,31 @@ Send a locally stored torrent file to the DownloadStation:
 .. code-block:: bash
 
     $ ds-down 'archlinux-2014.07.03-dual.iso.torrent'
+
+
+Install
+-------
+
+Example of a simple user install with from source:
+
+.. code-block:: bash
+
+    python3 setup.py install --exec_name="ds_down" --user
+
+The executable console script name can be controlled with the ´--exec_name=´
+argument. The default is ´ds_down´. The executable script in this example is
+placed in ´$HOME/.local/bin´ which can be added to the PATH variable if needed.
+This also installs needed dependencies.
+
+PyPI Install
+------------
+
+Alternatively last published version can be installed from PyPI with pip:
+
+.. code-block:: bash
+
+    pip3 install --user ds-down
+
 
 
 .. _`API pdf`: http://ukdl.synology.com/download/Document/DeveloperGuide/Synology_Download_Station_Web_API.pdf
