@@ -5,10 +5,10 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-README = open(os.path.join(here, 'README.rst')).read() if os.path.exists("README.rst") else ""
-NEWS = open(os.path.join(here, 'NEWS.rst')).read() if os.path.exists("NEWS.rst") else ""
+VERSION = open(os.path.join(here, 'VERSION')).read().strip()
+README  = open(os.path.join(here, 'README.rst')).read() if os.path.exists("README.rst") else ""
+NEWS    = open(os.path.join(here, 'NEWS.rst')).read() if os.path.exists("NEWS.rst") else ""
 
-version      = '0.2.1'
 author       ='Esa Määttä'
 author_email ='esa.maatta@iki.fi'
 
@@ -33,7 +33,7 @@ if "--no-console-scripts" in sys.argv[1:]:
 install_requires = []
 
 setup(name='ds-down',
-    version=version,
+    version=VERSION,
     description="Synology Download Station url adder.",
     long_description=README + '\n\n' + NEWS,
     classifiers=[c.strip() for c in """
