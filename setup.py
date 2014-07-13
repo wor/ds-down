@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*- vim:fenc=utf-8:ft=python:et:sw=4:ts=4:sts=4
 from setuptools import setup, find_packages
+from codecs import open # To use a consistent encoding
 import sys
 import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-VERSION = open(os.path.join(here, 'VERSION')).read().strip()
-README  = open(os.path.join(here, 'README.rst')).read() if os.path.exists("README.rst") else ""
-NEWS    = open(os.path.join(here, 'NEWS.rst')).read() if os.path.exists("NEWS.rst") else ""
+VERSION = open(os.path.join(here, 'VERSION'), encoding="utf-8").read().strip()
+README  = open(os.path.join(here, 'README.rst'), encoding="utf-8").read() if os.path.exists("README.rst") else ""
+NEWS    = open(os.path.join(here, 'NEWS.rst'), encoding="utf-8").read() if os.path.exists("NEWS.rst") else ""
 
 author       ='Esa Määttä'
 author_email ='esa.maatta@iki.fi'
