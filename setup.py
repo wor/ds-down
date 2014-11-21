@@ -50,7 +50,7 @@ setup(name='ds-down',
     maintainer=author,
     author_email=author_email,
     maintainer_email=author_email,
-    url='http://github.com/wor/ds-down',
+    url='https://github.com/wor/ds-down',
     license='GPL3',
     #package_data = {
     #        '': ['*.rst', 'ds-down.conf', 'ds-down.desktop'],
