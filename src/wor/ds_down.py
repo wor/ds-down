@@ -30,7 +30,7 @@ import subprocess
 
 
 class NoDefaultHeaderConfigParser(configparser.ConfigParser):
-    """ConfigParser without the need of default section."""
+    """ConfigParser without the need of the default section."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.base_config_name = "BASE_CONFIG_98f93"
@@ -99,6 +99,7 @@ def read_config(config_fn):
         config_fn: str. Config file name (path).
     """
     log = logging.getLogger(__name__)
+
     def get_option(opt_name):
         try:
             return config.get_default(opt_name)
@@ -122,12 +123,102 @@ def read_config(config_fn):
     password     = get_password(get_option("passwordeval"))
     return username, host, password
 
+class RequestCreator(object):
+    """Factory class to create Request functions with necessary data to work
+    with Synology DownloadStation api.
+    """
+    auth_data = {
+            'api': 'SYNO.API.Auth',
+            'version': '2',
+            'session': 'DownloadStation',
+            'format': 'sid',
+            }
+    task_create_data = {
+            'api': 'SYNO.DownloadStation.Task',
+            'version': '1',
+            'session': 'DownloadStation',
+            'method': 'create',
+            }
+
+    def __new__(cls):
+        raise TypeError("Factory class: no instantiation")
+
+    @staticmethod
+    def _get_base_url(host):
+        return host + "/webapi"
+
+    @classmethod
+    def _get_auth_url(cls, host):
+        return cls._get_base_url(host) + "/auth.cgi"
+
+    @classmethod
+    def _get_task_url(cls, host):
+        return cls._get_base_url(host) + "/DownloadStation/task.cgi"
+
+    @classmethod
+    def get_auth_login_request(cls, username, password, host):
+        log = logging.getLogger(__name__)
+        data = cls.auth_data
+        data['username'] = username
+        data['password'] = password
+        data['method']   = "login"
+        url_auth = cls._get_auth_url(host)
+        log.debug(url_auth)
+        log.debug(data)
+        return lambda: requests.post(url=url_auth, data=data, verify=False)
+
+    @classmethod
+    def get_auth_logout_request(cls, host):
+        data = cls.auth_data
+        data['method']   = "logout"
+        url_auth = cls._get_auth_url(host)
+        return lambda: requests.post(url=url_auth, data=data, verify=False)
+
+    @classmethod
+    def get_task_create_url_request(cls, host, auth, add_url, payload=None):
+        data = cls.task_create_data
+        data['_sid']     = auth
+        url_task = get_task_url(host)
+        if not payload:
+            data['uri']  = add_url
+            return lambda: requests.post(url=url_task, data=data, verify=False)
+        else:
+            files = {'file': (add_url, payload)}
+            return lambda: requests.post(url=url_task, data=data, files=files, verify=False)
+
+def perform_request(request_func):
+    """Executes a request created with RequestCreator with error checking.
+
+    Returns None in case of an error, otherwise request returned data in a dict.
+
+    Parameters:
+
+    - request_func: callable. Request function to be called.
+    """
+    log = logging.getLogger(__name__)
+
+    r = request_func()
+    if r.status_code != 200:
+        log.error("Request failed with status code: {}",format(r.status_code))
+        return None
+    rj = json.loads(r.text)
+    if not rj['success']:
+        log.error("Request failed with response data: {}".format(rj))
+        return None
+    return rj
+
 def send_url(add_url, config_file):
     """Sends the given url Synology DownloadStation.
 
-    Now handles only local files and urls which start with "http:"
+    Now handles only local files and urls which start with "http:" or "magnet:".
+
+    Parameters:
+
+    - add_url: str. Url/file to be send to the download station.
+    - config_file: str. Path to the config file.
     """
     log = logging.getLogger(__name__)
+
     log.debug("Using config file: {}".format(config_file))
     log.debug("Adding url: {}".format(add_url))
 
@@ -135,83 +226,37 @@ def send_url(add_url, config_file):
     if not username or not host or not password:
         return False
 
-    host = host + "/webapi"
-    url_auth = host + "/auth.cgi"
-    url_ds = host + "/DownloadStation/task.cgi"
-
     # Init session and geth auth token
-    data = {
-        'api': 'SYNO.API.Auth',
-        'version': '2',
-        'method': 'login',
-        'account': username,
-        'passwd': password,
-        'session': 'DownloadStation',
-        'format': 'sid'
-    }
-    r = requests.post(url=url_auth, data=data, verify=False)
-    if r.status_code != 200:
-        log.error("Auth request failed with status code: {}",format(r.status_code))
+    ret = perform_request(
+            RequestCreator.get_auth_login_request(username, password, host))
+    if not ret:
+        log.error("Login failed!")
         return False
-    rj = json.loads(r.text)
-    if not rj['success']:
-        log.error("Auth failed with response data: {}".format(rj))
-        return False
-    auth = rj['data']['sid']
 
     session = requests.session() # XXX: is this only for cookie and not sid
-    # Send local file
-    if not add_url.startswith("http:") and not add_url.startswith("magnet:"):
-        with open(add_url,'rb') as payload:
-            args = {
-                    'api': 'SYNO.DownloadStation.Task',
-                    'version': '1',
-                    'method': 'create',
-                    'session': 'DownloadStation',
-                    '_sid': auth
-                    }
-            files = {'file': (add_url, payload)}
-            r = session.post(url_ds, data=args, files=files, verify=False)
-            if r.status_code != 200:
-                log.error("Add file request failed with status code: {}",format(r.status_code))
-                return False
-            rj = json.loads(r.text)
-            if not rj['success']:
-                log.error("Add file failed with response data: {}".format(rj))
-                return False
-    else:
+    auth = ret['data']['sid']
+
+    if add_url.startswith("http:") or add_url.startswith("magnet:"):
         # Send the url
-        data = {
-            'api': 'SYNO.DownloadStation.Task',
-            'version': '1',
-            'method': 'create',
-            'session': 'DownloadStation',
-            '_sid': auth,
-            'uri': add_url
-        }
-        r = session.post(url=url_ds, data=data, verify=False)
-        if r.status_code != 200:
-            log.error("Add uri request failed with status code: {}",format(r.status_code))
+        ret = perform_request(
+                RequestCreator.get_task_create_url_request(host, auth, add_url))
+        if not ret:
+            log.error("Adding download with url failed!")
             return False
-        rj = json.loads(r.text)
-        if not rj['success']:
-            log.error("Add uri failed with response data: {}".format(rj))
-            return False
+    else:
+        # Send local file
+        with open(add_url,'rb') as payload:
+            ret = perform_request(
+                    RequestCreator.get_task_create_url_request(host, auth, add_url, payload))
+            if not ret:
+                log.error("Adding download from file failed!")
+                return False
 
     # Logout
-    data = {
-        'api': 'SYNO.API.Auth',
-        'version': '1',
-        'method': 'logout',
-        'session': 'DownloadStation',
-    }
-    r = session.post(url_auth, data=data, verify=False)
-    if r.status_code != 200:
-        log.error("Logout request failed with status code: {}",format(r.status_code))
-        return False
-    rj = json.loads(r.text)
-    if not rj['success']:
-        log.error("Logout failed with response data: {}".format(rj))
+    ret = perform_request(
+            RequestCreator.get_auth_logout_request(host))
+    if not ret:
+        log.error("Logout failed!")
         return False
 
     return True
